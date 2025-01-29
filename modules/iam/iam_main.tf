@@ -48,15 +48,14 @@ resource "aws_iam_role" "aft_account_provisioning_role" {
 }
 
 resource "aws_iam_policy" "aft_account_provisioning_policy" {
-  name        = "aft-account-provisioning-policy"
-  description = "Policy for managing accounts in AWS Organizations"
+  name = "aft-account-provisioning-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "organizations:CreateAccount",
           "organizations:ListAccounts",
           "organizations:MoveAccount",

@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "aft_logs" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        sse_algorithm   = "aws:kms"
+        sse_algorithm     = "aws:kms"
         kms_master_key_id = aws_kms_key.aft_key.arn
       }
     }
@@ -55,6 +55,7 @@ resource "aws_kms_key" "aft_key" {
         Action    = [
           "kms:Encrypt",
           "kms:Decrypt",
+          "kms:ReEncrypt*",
           "kms:GenerateDataKey*",
           "kms:DescribeKey"
         ]
@@ -66,7 +67,7 @@ resource "aws_kms_key" "aft_key" {
   tags = {
     Environment = "Production"
     ManagedBy   = "Terraform"
-    Name        = "AFT KMS Key"
+    Name        = "AFT Key"
   }
 }
 
@@ -96,13 +97,13 @@ resource "aws_dynamodb_table" "aft_requests" {
     type = "S"
   }
 
+  point_in_time_recovery {
+    enabled = true
+  }
+
   server_side_encryption {
     enabled     = true
     kms_key_arn = aws_kms_key.aft_key.arn
-  }
-
-  point_in_time_recovery {
-    enabled = true
   }
 
   tags = {
