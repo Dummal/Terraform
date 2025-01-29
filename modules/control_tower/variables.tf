@@ -13,16 +13,6 @@ variable "enabled_policy_types" {
   default = ["SERVICE_CONTROL_POLICY", "TAG_POLICY"]
 }
 
-variable "organization_services" {
-  type    = list(string)
-  default = [
-    "cloudtrail.amazonaws.com",
-    "config.amazonaws.com",
-    "sso.amazonaws.com",
-    "controltower.amazonaws.com"
-  ]
-}
-
 variable "organizational_units" {
   type = list(object({
     name = string
@@ -46,28 +36,39 @@ variable "organizational_units" {
   ]
 }
 
-variable "create_scp" {
+variable "enabled_services" {
+  type    = list(string)
+  default = [
+    "cloudtrail.amazonaws.com",
+    "config.amazonaws.com",
+    "sso.amazonaws.com",
+    "controltower.amazonaws.com"
+  ]
+}
+
+variable "create_service_control_policy" {
   type    = bool
   default = true
 }
 
-variable "scp_name" {
-  type    = string
-  default = "DenyRootUser"
-}
-
-variable "scp_policy" {
+variable "service_control_policy" {
   type = object({
-    effect    = string
-    actions   = list(string)
-    principal = string
-    condition = map(string)
+    name      = string
+    statement = object({
+      effect    = string
+      action    = list(string)
+      principal = string
+    })
+    conditions = map(any)
   })
   default = {
-    effect    = "Deny"
-    actions   = ["*"]
-    principal = "arn:aws:iam::*:root"
-    condition = {}
+    name      = "DenyRootUser"
+    statement = {
+      effect    = "Deny"
+      action    = ["*"]
+      principal = "arn:aws:iam::*:root"
+    }
+    conditions = {}
   }
 }
 
@@ -82,13 +83,11 @@ variable "enable_control_tower" {
 }
 
 variable "master_account_email" {
-  type    = string
-  default = ""
+  type = string
 }
 
 variable "control_tower_region" {
-  type    = string
-  default = ""
+  type = string
 }
 
 variable "output_organization_ids" {

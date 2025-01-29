@@ -38,25 +38,27 @@ resource "aws_kms_key" "aft_key" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
+        Sid       = "AllowRootAccountAccess"
+        Effect    = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${var.master_account_id}:root"
+          AWS = "arn:aws:iam::123456789012:root"
         }
-        Action = "kms:*"
-        Resource = "*"
+        Action    = "kms:*"
+        Resource  = "*"
       },
       {
-        Effect = "Allow"
+        Sid       = "AllowCloudWatchLogsAccess"
+        Effect    = "Allow"
         Principal = {
-          Service = "logs.${var.region}.amazonaws.com"
+          Service = "logs.amazonaws.com"
         }
-        Action = [
+        Action    = [
           "kms:Encrypt",
           "kms:Decrypt",
           "kms:GenerateDataKey*",
           "kms:DescribeKey"
         ]
-        Resource = "*"
+        Resource  = "*"
       }
     ]
   })
@@ -94,13 +96,13 @@ resource "aws_dynamodb_table" "aft_requests" {
     type = "S"
   }
 
-  point_in_time_recovery {
-    enabled = true
-  }
-
   server_side_encryption {
     enabled     = true
     kms_key_arn = aws_kms_key.aft_key.arn
+  }
+
+  point_in_time_recovery {
+    enabled = true
   }
 
   tags = {
