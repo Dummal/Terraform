@@ -14,13 +14,6 @@ resource "aws_s3_bucket" "aft_logs" {
     }
   }
 
-  block_public_access {
-    block_public_acls       = true
-    block_public_policy     = true
-    ignore_public_acls      = true
-    restrict_public_buckets = true
-  }
-
   tags = {
     Environment = "Production"
     ManagedBy   = "Terraform"
@@ -28,34 +21,44 @@ resource "aws_s3_bucket" "aft_logs" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "aft_logs" {
+  bucket = aws_s3_bucket.aft_logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_kms_key" "aft_key" {
   description             = "KMS key for AFT resources"
   enable_key_rotation     = true
 
   policy = jsonencode({
-    Version = "2012-10-17",
+    Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "AllowRootAccountAccess",
-        Effect    = "Allow",
+        Sid       = "AllowRootAccountAccess"
+        Effect    = "Allow"
         Principal = {
           AWS = "arn:aws:iam::123456789012:root"
-        },
-        Action    = "kms:*",
+        }
+        Action    = "kms:*"
         Resource  = "*"
       },
       {
-        Sid       = "AllowCloudWatchLogsAccess",
-        Effect    = "Allow",
+        Sid       = "AllowCloudWatchLogsAccess"
+        Effect    = "Allow"
         Principal = {
           Service = "logs.amazonaws.com"
-        },
+        }
         Action    = [
           "kms:Encrypt",
           "kms:Decrypt",
+          "kms:ReEncrypt*",
           "kms:GenerateDataKey*",
           "kms:DescribeKey"
-        ],
+        ]
         Resource  = "*"
       }
     ]
@@ -64,7 +67,7 @@ resource "aws_kms_key" "aft_key" {
   tags = {
     Environment = "Production"
     ManagedBy   = "Terraform"
-    Name        = "AFT KMS Key"
+    Name        = "AFT Key"
   }
 }
 

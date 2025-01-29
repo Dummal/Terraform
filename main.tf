@@ -58,7 +58,7 @@ resource "aws_kms_key" "aft_kms_key" {
           "kms:GenerateDataKey*",
           "kms:DescribeKey"
         ]
-        Resource = "*"
+        Resource  = "*"
       }
     ]
   })
